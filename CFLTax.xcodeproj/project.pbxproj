@@ -14,6 +14,8 @@
 		DB3CA45C2D2F1C95004A4E35 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = DB3CA45B2D2F1C95004A4E35 /* FirebaseCore */; };
 		DB3CA63B2D306C14004A4E35 /* FirebaseAnalyticsOnDeviceConversion in Frameworks */ = {isa = PBXBuildFile; productRef = DB3CA63A2D306C14004A4E35 /* FirebaseAnalyticsOnDeviceConversion */; };
 		DB98D1CB2D21F01D0091FDAA /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = DB98D1CA2D21F01D0091FDAA /* FirebaseAnalytics */; };
+		DBD6FD902D553E4B00DAC41A /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = DBD6FD8F2D553E4B00DAC41A /* RevenueCat */; };
+		DBD6FD922D553E4B00DAC41A /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = DBD6FD912D553E4B00DAC41A /* RevenueCatUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,8 +35,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DBD6FD902D553E4B00DAC41A /* RevenueCat in Frameworks */,
 				DB3CA45C2D2F1C95004A4E35 /* FirebaseCore in Frameworks */,
 				DB3CA63B2D306C14004A4E35 /* FirebaseAnalyticsOnDeviceConversion in Frameworks */,
+				DBD6FD922D553E4B00DAC41A /* RevenueCatUI in Frameworks */,
 				DB98D1CB2D21F01D0091FDAA /* FirebaseAnalytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -93,6 +97,8 @@
 				DB98D1CA2D21F01D0091FDAA /* FirebaseAnalytics */,
 				DB3CA45B2D2F1C95004A4E35 /* FirebaseCore */,
 				DB3CA63A2D306C14004A4E35 /* FirebaseAnalyticsOnDeviceConversion */,
+				DBD6FD8F2D553E4B00DAC41A /* RevenueCat */,
+				DBD6FD912D553E4B00DAC41A /* RevenueCatUI */,
 			);
 			productName = CFLTax;
 			productReference = DBB1712E2C6514EA00365B9A /* CFLTax.app */;
@@ -124,6 +130,7 @@
 			mainGroup = DBB171252C6514EA00365B9A;
 			packageReferences = (
 				DB98D1C92D21F01D0091FDAA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				DBD6FD8E2D553E4B00DAC41A /* XCRemoteSwiftPackageReference "purchases-ios" */,
 			);
 			productRefGroup = DBB1712F2C6514EA00365B9A /* Products */;
 			projectDirPath = "";
@@ -386,6 +393,14 @@
 				minimumVersion = 11.6.0;
 			};
 		};
+		DBD6FD8E2D553E4B00DAC41A /* XCRemoteSwiftPackageReference "purchases-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.16.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -403,6 +418,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DB98D1C92D21F01D0091FDAA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAnalytics;
+		};
+		DBD6FD8F2D553E4B00DAC41A /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DBD6FD8E2D553E4B00DAC41A /* XCRemoteSwiftPackageReference "purchases-ios" */;
+			productName = RevenueCat;
+		};
+		DBD6FD912D553E4B00DAC41A /* RevenueCatUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DBD6FD8E2D553E4B00DAC41A /* XCRemoteSwiftPackageReference "purchases-ios" */;
+			productName = RevenueCatUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
