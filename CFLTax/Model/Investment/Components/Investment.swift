@@ -181,190 +181,139 @@ public class Investment {
     }
     
     private func isYieldCalculationValid() -> Bool {
-        let tempInvestment: Investment = self.clone()
-        let maxAmount: Decimal = self.asset.lessorCost.toDecimal() * 2.0
-        
+        let tempInvestment = self.clone()
+        let maxRate: Decimal = 0.15
+        let minRate: Decimal = 0.00
+        let dayCountMethod = tempInvestment.economics.dayCountMethod
+
         tempInvestment.setAfterTaxCashflows()
-        if tempInvestment.afterTaxCashflows.getTotal() < 0 || tempInvestment.afterTaxCashflows.getTotal() > maxAmount {
-            return false
-        }
-        tempInvestment.afterTaxCashflows.removeAll()
-        
-        tempInvestment.setBeforeTaxCashflows()
-        if tempInvestment.beforeTaxCashflows.getTotal() < 0  || tempInvestment.beforeTaxCashflows.getTotal() > maxAmount{
-            return false
-        }
-        tempInvestment.beforeTaxCashflows.removeAll()
-        
-        return true
+
+        let npvAtMaxRate = tempInvestment.afterTaxCashflows.ModXNPV(aDiscountRate: maxRate, aDayCountMethod: dayCountMethod)
+        let npvAtMinRate = tempInvestment.afterTaxCashflows.ModXNPV(aDiscountRate: minRate, aDayCountMethod: dayCountMethod)
+
+        return !(npvAtMaxRate > 0.0 || npvAtMinRate < 0.0)
     }
     
     private func isFeeCalculationValid() -> Bool {
-        let tempInvestment: Investment = self.clone()
-        let maxAmount: Decimal = tempInvestment.asset.lessorCost.toDecimal() * maximumFeePercent.toDecimal()
-        var aTargetYield: Decimal = tempInvestment.economics.yieldTarget.toDecimal()
+        let tempInvestment = self.clone()
+        let aTargetYield: Decimal = tempInvestment.economics.yieldTarget.toDecimal()
         let aYieldMethod: YieldMethod = tempInvestment.economics.yieldMethod
-        tempInvestment.fee.amount = maxAmount.toString()
-        
-        if aYieldMethod == .MISF_AT {
-            tempInvestment.fee.feeType = .expense
-            tempInvestment.setAfterTaxCashflows()
-            if tempInvestment.afterTaxCashflows.ModXNPV(aDiscountRate: aTargetYield, aDayCountMethod: tempInvestment.economics.dayCountMethod) > 0.0 {
-                return false
+        let myFeeType: FeeType = tempInvestment.fee.feeType
+        tempInvestment.fee.amount = (0.00).toString()
+        var currentYield: Decimal = 0.0
+        var feeCalculationIsValid: Bool = true
+        let tolerance: Decimal = 0.0005
+
+        switch myFeeType {
+        case .expense:
+            switch aYieldMethod {
+            case .MISF_AT:
+                tempInvestment.setAfterTaxCashflows()
+                currentYield = tempInvestment.getMISF_AT_Yield()
+            case .MISF_BT:
+                tempInvestment.setAfterTaxCashflows()
+                currentYield = tempInvestment.getMISF_BT_Yield()
+            case .IRR_PTCF:
+                tempInvestment.setBeforeTaxCashflows()
+                currentYield = tempInvestment.getIRR_PTCF()
             }
-            tempInvestment.afterTaxCashflows.removeAll()
-            
-            tempInvestment.fee.feeType = .income
-            tempInvestment.setAfterTaxCashflows()
-            if tempInvestment.afterTaxCashflows.ModXNPV(aDiscountRate: aTargetYield, aDayCountMethod: tempInvestment.economics.dayCountMethod) < 0.0 {
-                return false
+            if aTargetYield >= currentYield || abs(currentYield - aTargetYield) < tolerance {
+                feeCalculationIsValid = false
             }
-            
-            return true
-        } else if aYieldMethod == .MISF_BT {
-            aTargetYield = aTargetYield * (1 - tempInvestment.taxAssumptions.federalTaxRate.toDecimal())
-            tempInvestment.fee.feeType = .expense
-            tempInvestment.setAfterTaxCashflows()
-            if tempInvestment.afterTaxCashflows.ModXNPV(aDiscountRate: aTargetYield, aDayCountMethod: tempInvestment.economics.dayCountMethod) > 0.0 {
-                return false
+        case .income:
+            switch aYieldMethod {
+            case .MISF_AT:
+                tempInvestment.setAfterTaxCashflows()
+                currentYield = tempInvestment.getMISF_AT_Yield()
+            case .MISF_BT:
+                tempInvestment.setAfterTaxCashflows()
+                currentYield = tempInvestment.getMISF_BT_Yield()
+            case .IRR_PTCF:
+                tempInvestment.setBeforeTaxCashflows()
+                currentYield = tempInvestment.getIRR_PTCF()
             }
-            tempInvestment.afterTaxCashflows.removeAll()
-            
-            tempInvestment.fee.feeType = .income
-            tempInvestment.setAfterTaxCashflows()
-            if tempInvestment.afterTaxCashflows.ModXNPV(aDiscountRate: aTargetYield, aDayCountMethod: tempInvestment.economics.dayCountMethod) < 0.0 {
-                return false
+            if aTargetYield <= currentYield || abs(currentYield - aTargetYield) < tolerance {
+                feeCalculationIsValid = false
             }
-            
-            return true
-        } else { //Pre-Tax IRR
-            tempInvestment.fee.feeType = .expense
-            tempInvestment.setBeforeTaxCashflows()
-            if tempInvestment.beforeTaxCashflows.ModXNPV(aDiscountRate: aTargetYield, aDayCountMethod: tempInvestment.economics.dayCountMethod) > 0.0 {
-                return false
-            }
-            tempInvestment.beforeTaxCashflows.removeAll()
-            
-            tempInvestment.fee.feeType = .income
-            tempInvestment.setBeforeTaxCashflows()
-            if tempInvestment.beforeTaxCashflows.ModXNPV(aDiscountRate: aTargetYield, aDayCountMethod: tempInvestment.economics.dayCountMethod) < 0.0 {
-                return false
-            }
-            
-            return true
         }
+        return feeCalculationIsValid
     }
     
     private func isLessorCostCalculationValid() -> Bool {
-        let tempInvestment: Investment = self.clone()
-        tempInvestment.asset.lessorCost = minimumLessorCost
+        let tempInvestment = self.clone()
+        let minAmount: Decimal = 10_000.00  // Minimum allowable lessor cost
+        let maxAmount: Decimal = 10_000_000.00  // Maximum allowable lessor cost
         let aTargetYield: Decimal = tempInvestment.economics.yieldTarget.toDecimal()
         let aYieldMethod: YieldMethod = tempInvestment.economics.yieldMethod
-        
-        switch aYieldMethod {
-        case .MISF_AT:
-            tempInvestment.asset.lessorCost = minimumLessorCost
-            tempInvestment.setAfterTaxCashflows()
-            if tempInvestment.afterTaxCashflows.ModXNPV(aDiscountRate: aTargetYield, aDayCountMethod: tempInvestment.economics.dayCountMethod) < 0.00 {
-                return false
+
+        // Helper function to check if lessor cost is within valid bounds
+        func isLessorCostWithinBounds(for lessorCost: Decimal, yieldMethod: YieldMethod) -> Bool {
+            tempInvestment.asset.lessorCost = lessorCost.toString(decPlaces: 2)
+
+            switch yieldMethod {
+            case .MISF_AT:
+                tempInvestment.setAfterTaxCashflows()
+                return tempInvestment.afterTaxCashflows.ModXNPV(aDiscountRate: aTargetYield,
+                                                                 aDayCountMethod: tempInvestment.economics.dayCountMethod) < 0
+            case .MISF_BT:
+                tempInvestment.setAfterTaxCashflows()
+                return tempInvestment.afterTaxCashflows.ModXNPV(aDiscountRate: aTargetYield,
+                                                                 aDayCountMethod: tempInvestment.economics.dayCountMethod) < 0
+            case .IRR_PTCF:
+                tempInvestment.setBeforeTaxCashflows()
+                return tempInvestment.beforeTaxCashflows.ModXNPV(aDiscountRate: aTargetYield,
+                                                                  aDayCountMethod: tempInvestment.economics.dayCountMethod) < 0
             }
-            tempInvestment.afterTaxCashflows.removeAll()
-            
-            tempInvestment.asset.lessorCost = maximumLessorCost
-            tempInvestment.setAfterTaxCashflows()
-            if tempInvestment.afterTaxCashflows.ModXNPV(aDiscountRate: aTargetYield, aDayCountMethod: tempInvestment.economics.dayCountMethod) > 0.00 {
-                return false
-            }
-        case .MISF_BT:
-            tempInvestment.asset.lessorCost = minimumLessorCost
-            tempInvestment.setAfterTaxCashflows()
-            if tempInvestment.afterTaxCashflows.ModXNPV(aDiscountRate: aTargetYield, aDayCountMethod: tempInvestment.economics.dayCountMethod) < 0.00 {
-                return false
-            }
-            tempInvestment.afterTaxCashflows.removeAll()
-            
-            tempInvestment.asset.lessorCost = maximumLessorCost
-            tempInvestment.setAfterTaxCashflows()
-            if tempInvestment.afterTaxCashflows.ModXNPV(aDiscountRate: aTargetYield, aDayCountMethod: tempInvestment.economics.dayCountMethod) > 0.00     {
-                return false
-            }
-        case .IRR_PTCF:
-            tempInvestment.asset.lessorCost = minimumLessorCost
-            tempInvestment.setBeforeTaxCashflows()
-            if tempInvestment.beforeTaxCashflows.ModXNPV(aDiscountRate: aTargetYield, aDayCountMethod: tempInvestment.economics.dayCountMethod) < 0.00 {
-                return false
-            }
-            tempInvestment.beforeTaxCashflows.removeAll()
-            
-            tempInvestment.asset.lessorCost = maximumLessorCost
-            tempInvestment.setBeforeTaxCashflows()
-            if tempInvestment.beforeTaxCashflows.ModXNPV(aDiscountRate: aTargetYield, aDayCountMethod: tempInvestment.economics.dayCountMethod) > 0.00     {
-                return false
-            }
+        }
+
+        // Validate Lessor Cost at minimum and maximum boundaries
+        if isLessorCostWithinBounds(for: minAmount, yieldMethod: aYieldMethod) {
+            return false
+        }
+        if !isLessorCostWithinBounds(for: maxAmount, yieldMethod: aYieldMethod) {
+            return false
         }
 
         return true
     }
     
     private func isResidualCalculationValid() -> Bool {
-        let tempInvestment: Investment = self.clone()
+        let tempInvestment = self.clone()
         let minAmount: Decimal = 0.0
         let maxAmount: Decimal = tempInvestment.asset.lessorCost.toDecimal()
         let aTargetYield: Decimal = tempInvestment.economics.yieldTarget.toDecimal()
         let aYieldMethod: YieldMethod = tempInvestment.economics.yieldMethod
-        let minimumResidual: Decimal = tempInvestment.asset.lessorCost.toDecimal() * 0.01
-        
-        if aYieldMethod == .MISF_AT {
-            //Test if PV of Lease with a 0.00 residual > 0.00, if yes then calculation is invalid (residual can't be reduced further)
-            tempInvestment.asset.residualValue = minAmount.toString(decPlaces: 4)
-            tempInvestment.setAfterTaxCashflows()
-            if tempInvestment.afterTaxCashflows.ModXNPV(aDiscountRate: aTargetYield, aDayCountMethod: tempInvestment.economics.dayCountMethod) > minimumResidual {
-                return false
+        let minimumResidual: Decimal = maxAmount * 0.01  // 1% of Lessor Cost
+
+        // Helper function to check if residual value is within valid bounds
+        func isResidualWithinBounds(for residualValue: Decimal, yieldMethod: YieldMethod) -> Bool {
+            tempInvestment.asset.residualValue = residualValue.toString(decPlaces: 4)
+
+            switch yieldMethod {
+            case .MISF_AT:
+                tempInvestment.setAfterTaxCashflows()
+                return tempInvestment.afterTaxCashflows.ModXNPV(aDiscountRate: aTargetYield,
+                                                                 aDayCountMethod: tempInvestment.economics.dayCountMethod) > minimumResidual
+            case .MISF_BT:
+                tempInvestment.setAfterTaxCashflows()
+                return tempInvestment.afterTaxCashflows.ModXNPV(aDiscountRate: aTargetYield,
+                                                                 aDayCountMethod: tempInvestment.economics.dayCountMethod) > minimumResidual
+            case .IRR_PTCF:
+                tempInvestment.setBeforeTaxCashflows()
+                return tempInvestment.beforeTaxCashflows.ModXNPV(aDiscountRate: aTargetYield,
+                                                                  aDayCountMethod: tempInvestment.economics.dayCountMethod) > minimumResidual
             }
-            tempInvestment.afterTaxCashflows.removeAll()
-            //Test if PV of Lease with a 100.00 residual < 0.00, if yes then calculation is invalid (residual can't be increased further)
-            tempInvestment.asset.residualValue = maxAmount.toString(decPlaces: 4)
-            tempInvestment.setAfterTaxCashflows()
-            if tempInvestment.afterTaxCashflows.ModXNPV(aDiscountRate: aTargetYield, aDayCountMethod: tempInvestment.economics.dayCountMethod) < minimumResidual {
-                return false
-            }
-            
-            return true
-        } else if aYieldMethod == .MISF_BT {
-            //Test if PV of Lease with a 0.00 residual > 0.00, if yes then calculation is invalid
-            tempInvestment.asset.residualValue = minAmount.toString(decPlaces: 4)
-            tempInvestment.setAfterTaxCashflows()
-            if tempInvestment.afterTaxCashflows.ModXNPV(aDiscountRate: aTargetYield, aDayCountMethod: tempInvestment.economics.dayCountMethod) > minimumResidual {
-                return false
-            }
-            tempInvestment.afterTaxCashflows.removeAll()
-            
-            //Test if PV of Lease with a 100.00 residual < 0.00, if yes then calculation is invalid
-            tempInvestment.asset.residualValue = maxAmount.toString(decPlaces: 4)
-            tempInvestment.setAfterTaxCashflows()
-            if tempInvestment.afterTaxCashflows.ModXNPV(aDiscountRate: aTargetYield, aDayCountMethod: tempInvestment.economics.dayCountMethod) < minimumResidual {
-                return false
-            }
-            
-            return true
-        } else {
-            //Test if PV of Lease with a 0.00 residual > 0.00, if yes then calculation is invalid (residual can't be reduced further)
-            tempInvestment.asset.residualValue = minAmount.toString(decPlaces: 4)
-            tempInvestment.setBeforeTaxCashflows()
-            if tempInvestment.beforeTaxCashflows.ModXNPV(aDiscountRate: aTargetYield, aDayCountMethod: tempInvestment.economics.dayCountMethod) > minimumResidual {
-                return false
-            }
-            tempInvestment.beforeTaxCashflows.removeAll()
-            
-            //Test if PV of Lease with a 100.00 residual < 0.00, if yes then calculation is invalid
-            tempInvestment.asset.residualValue = maxAmount.toString(decPlaces: 4)
-            tempInvestment.setBeforeTaxCashflows()
-            if tempInvestment.beforeTaxCashflows.ModXNPV(aDiscountRate: aTargetYield, aDayCountMethod: tempInvestment.economics.dayCountMethod) < minimumResidual {
-                return false
-            }
-            
-            return true
         }
+
+        // Validate Residual Value at minimum and maximum boundaries
+        if isResidualWithinBounds(for: minAmount, yieldMethod: aYieldMethod) {
+            return false
+        }
+        if !isResidualWithinBounds(for: maxAmount, yieldMethod: aYieldMethod) {
+            return false
+        }
+
+        return true
     }
     
     public func calculate(plannedIncome: String = "0.0", unplannedDate: Date = Date()) {
@@ -373,13 +322,13 @@ public class Investment {
         
         switch self.economics.solveFor {
         case .fee:
-            solveForFee(aYieldMethod: aYieldType, aTargetYield: aTargetYield)
+            solveForTarget(aTargetVariable: .fee, aYieldMethod: aYieldType, aTargetYield: aTargetYield)
         case .lessorCost:
-            solveForLessorCost(aYieldMethod: aYieldType, aTargetYield: aTargetYield)
+            solveForTarget(aTargetVariable: .lessorCost, aYieldMethod: aYieldType, aTargetYield: aTargetYield)
         case .residualValue:
-            solveForResidual(aYieldMethod: aYieldType, aTargetYield: aTargetYield)
+            solveForTarget(aTargetVariable: .residualValue, aYieldMethod: aYieldType, aTargetYield: aTargetYield)
         case .unLockedRentals:
-            solveForUnlockedPayments(aYieldMethod: aYieldType, aTargetYield: aTargetYield)
+            solveForTarget(aTargetVariable: .unLockedRentals, aYieldMethod: aYieldType, aTargetYield: aTargetYield)
         default:
             break
         }
