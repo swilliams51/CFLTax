@@ -53,17 +53,17 @@ public struct Group: Identifiable {
         return isEqual
     }
     
-    public mutating func makeEquivalent(to other: Group) {
-        self.amount = other.amount
-        self.endDate = other.endDate
-        self.locked = other.locked
-        self.noOfPayments = other.noOfPayments
-        self.startDate = other.startDate
-        self.timing = other.timing
-        self.paymentType = other.paymentType
-        self.isInterim = other.isInterim
-        self.unDeletable = other.unDeletable
-    }
+    public mutating func makeEqualTo(_ other: Group) {
+            self.amount = other.amount
+            self.endDate = other.endDate
+            self.locked = other.locked
+            self.noOfPayments = other.noOfPayments
+            self.startDate = other.startDate
+            self.timing = other.timing
+            self.paymentType = other.paymentType
+            self.isInterim = other.isInterim
+            self.unDeletable = other.unDeletable
+        }
     
     public func isCalculatedPaymentType() -> Bool {
         var bolIsCalcPayment: Bool = false

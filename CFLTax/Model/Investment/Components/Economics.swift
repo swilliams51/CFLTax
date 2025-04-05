@@ -34,16 +34,44 @@ public struct Economics {
         self.sinkingFundRate = "0.00"
     }
     
-    func isEqual(to other: Economics) -> Bool {
-        var isEqual: Bool = false
-           if yieldMethod == other.yieldMethod
-                && yieldTarget == other.yieldTarget
-                && solveFor == other.solveFor
-                && dayCountMethod == other.dayCountMethod
-                && discountRateForRent == other.discountRateForRent
-                && sinkingFundRate == other.sinkingFundRate {
-               isEqual = true
-           }
-        return isEqual
-    }
+    func isEqualTo(_ other: Economics) -> Bool {
+            var isEqual: Bool = false
+               if yieldMethod == other.yieldMethod
+                    && yieldTarget == other.yieldTarget
+                    && solveFor == other.solveFor
+                    && dayCountMethod == other.dayCountMethod
+                    && discountRateForRent == other.discountRateForRent
+                    && sinkingFundRate == other.sinkingFundRate {
+                   isEqual = true
+               }
+            return isEqual
+        }
+        
+        func changeComparedTo(_ other: Economics) -> ChangeType {
+            // If all properties match, return .none
+            if self.isEqualTo(other){
+                return .none
+            }
+            
+            if self.discountRateForRent == other.discountRateForRent {
+                return .immaterial
+            }
+            
+            if other.solveFor == .yield {
+                return .immaterial
+            }
+
+            // Default to .material if none of the above conditions matched
+            return .material
+        }
+        
+        mutating func makeEqualTo(_ other: Economics) {
+            self.yieldMethod = other.yieldMethod
+            self.yieldTarget = other.yieldTarget
+            self.solveFor = other.solveFor
+            self.dayCountMethod = other.dayCountMethod
+            self.discountRateForRent = other.discountRateForRent
+            self.sinkingFundRate = other.sinkingFundRate
+            
+        }
 }

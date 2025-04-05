@@ -295,8 +295,17 @@ extension EconomicsView {
     }
     
     func myDone() {
-        self.myInvestment.economics = myEconomics
-        path.removeLast()
+        switch myInvestment.economics.changeComparedTo(myEconomics) {
+               case .none:
+                   myInvestment.changeState = .none
+               case .immaterial:
+                   myInvestment.changeState = .immaterial
+               case .material:
+                   myInvestment.changeState = .material
+           }
+           
+           myInvestment.economics.makeEqualTo(myEconomics)
+           path.removeLast()
     }
 }
 

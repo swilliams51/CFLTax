@@ -13,7 +13,7 @@ struct FeeView: View {
     @Binding var isDark: Bool
     @Binding var currentFile: String
     
-    @State var myFee: Fee = Fee()
+    @State var myFee: Fee = Fee(amount: "1000.00", feeType: .expense, datePaid: Date())
     @State private var editAmountStarted: Bool = false
     @State private var maximumAmount: Decimal = 1.0
     @FocusState private var amountIsFocused: Bool
@@ -49,7 +49,7 @@ struct FeeView: View {
         .environment(\.colorScheme, isDark ? .dark : .light)
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            self.myFee = self.myInvestment.fee
+            self.myFee.makeEqualTo(self.myInvestment.fee)
             self.amountOnEntry = self.myFee.amount
         }
     }
@@ -109,7 +109,7 @@ struct FeeView: View {
         if self.myInvestment.fee.isEqual(to: myFee) == false {
             self.myInvestment.fee = myFee
             self.myInvestment.fee.hasChanged = true
-            self.myInvestment.setFee()
+            self.myInvestment.setFeesExistence()
         }
         path.removeLast()
     }

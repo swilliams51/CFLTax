@@ -76,7 +76,7 @@ struct AssetView: View {
         .environment(\.colorScheme, isDark ? .dark : .light)
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            self.myAsset = myInvestment.asset
+            self.myAsset.makeEqualTo(myInvestment.asset)
             self.nameOnEntry = myAsset.name
             self.lessorCostOnEntry = myAsset.lessorCost
             self.residualValueOnEntry = myAsset.residualValue
@@ -98,16 +98,22 @@ struct AssetView: View {
     }
     
     private func myDone() {
-        if myAsset.fundingDate != myInvestment.asset.fundingDate {
-            self.fundingDateHasChanged = true
+        let tempDate: Date = myInvestment.asset.fundingDate
+        
+        switch myInvestment.asset.changeComparedTo(myAsset) {
+            case .none:
+                myInvestment.changeState = .none
+            case .immaterial:
+                myInvestment.changeState = .immaterial
+            case .material:
+                myInvestment.changeState = .material
         }
-        if myInvestment.asset.isEqual(to: myAsset) == false {
-            myInvestment.asset = self.myAsset
-            myInvestment.hasChanged = true
-            if self.fundingDateHasChanged == true {
-                self.myInvestment.resetForFundingDateChange()
-            }
+        
+        myInvestment.asset = myAsset
+        if tempDate.isNotEqualTo(date: myAsset.fundingDate) {
+            myInvestment.resetForFundingDateChange()
         }
+
         path.removeLast()
     }
     

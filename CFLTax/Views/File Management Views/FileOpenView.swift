@@ -139,8 +139,8 @@ extension FileOpenView {
             //self.myLease.openAsTemplate(strFile: strFileText)
         } else {
             self.myInvestment.resetToFileData(strFile: strFileText)
-            self.myInvestment.setFee()
-            self.myInvestment.setEBO()
+            self.myInvestment.setFeesExistence()
+            self.myInvestment.setEBOsExistence()
         }
         self.currentFile = self.selectedFile
         self.path.removeAll()

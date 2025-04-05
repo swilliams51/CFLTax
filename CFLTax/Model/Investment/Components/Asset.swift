@@ -34,17 +34,59 @@ public struct Asset {
         self.thirdPartyGuarantyAmount = "0.0"
     }
     
-    func isEqual(to other: Asset) -> Bool {
-        var isEqual: Bool = false
-        if name == other.name &&
-            fundingDate.isEqualTo(date: other.fundingDate) &&
-        lessorCost == other.lessorCost &&
-        residualValue == other.residualValue &&
-        lesseeGuarantyAmount == other.lesseeGuarantyAmount &&
+    func changeComparedTo(_ other: Asset) -> ChangeType {
+            if self.isEqual(to: other) {
+                return .none
+            }
+            
+            if self.fundingDate.isEqualTo(date: other.fundingDate) == false {
+                return .material
+            }
+            
+            if self.lessorCost != other.lessorCost {
+                return .material
+            }
+            
+            if self.residualValue != other.residualValue {
+                return .material
+            }
+            
+
+            let immaterialMatches = [
+                self.name == other.name,
+                self.lesseeGuarantyAmount == other.lesseeGuarantyAmount,
+                self.thirdPartyGuarantyAmount == other.thirdPartyGuarantyAmount
+            ].filter { $0 }.count
+
+            if immaterialMatches > 0 {
+                return .immaterial
+            }
+
+            return .material
+        }
+
+        func isEqual(to other: Asset) -> Bool {
+            var isEqual: Bool = false
+            if name == other.name &&
+                fundingDate.isEqualTo(date: other.fundingDate) &&
+                lessorCost == other.lessorCost &&
+                residualValue == other.residualValue &&
+                lesseeGuarantyAmount == other.lesseeGuarantyAmount &&
                 thirdPartyGuarantyAmount == other.thirdPartyGuarantyAmount {
-             isEqual = true
-         }
-        return isEqual
-    }
+                 isEqual = true
+             }
+            return isEqual
+        }
+        
+        mutating func makeEqualTo(_ other: Asset) {
+            name = other.name
+            fundingDate = other.fundingDate
+            lessorCost = other.lessorCost
+            residualValue = other.residualValue
+            lesseeGuarantyAmount = other.lesseeGuarantyAmount
+            thirdPartyGuarantyAmount = other.thirdPartyGuarantyAmount
+        }
+
+    
     
 }

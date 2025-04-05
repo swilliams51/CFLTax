@@ -13,6 +13,7 @@ struct LeaseTermView: View {
     @Binding var isDark: Bool
     @Binding var currentFile: String
     
+    @State var myLeaseTerm = LeaseTerm()
     @State var baseCommenceDate: Date = Date()
     @State var myPaymentFrequency: Frequency = .monthly
     @State var paymentFrequencyOnEntry: Frequency = .monthly
@@ -50,10 +51,9 @@ struct LeaseTermView: View {
         .environment(\.colorScheme, isDark ? .dark : .light)
         .navigationBarBackButtonHidden(true)
         .onAppear {
+            self.myLeaseTerm.makeEqualTo(myInvestment.leaseTerm)
             self.baseCommenceDate = myInvestment.leaseTerm.baseCommenceDate
             self.paymentFrequencyOnEntry = myInvestment.leaseTerm.paymentFrequency
-            self.myPaymentFrequency = myInvestment.leaseTerm.paymentFrequency
-            self.endOfMonthRule = myInvestment.leaseTerm.endOfMonthRule
             self.rangeOfDates = getRangeOfBaseTermCommenceDates()
         }
     }
@@ -146,19 +146,18 @@ struct LeaseTermView: View {
     }
     
     func myDone() {
-        if self.baseCommenceDate != self.myInvestment.leaseTerm.baseCommenceDate {
-            self.myInvestment.hasChanged = true
-            self.myInvestment.leaseTerm.baseCommenceDate = self.baseCommenceDate
-            self.myInvestment.resetForBaseTermCommenceDateChange()
+        self.myLeaseTerm.baseCommenceDate = baseCommenceDate
+        self.myLeaseTerm.endOfMonthRule = endOfMonthRule
+        self.myLeaseTerm.paymentFrequency = myPaymentFrequency
+        
+        self.myInvestment.changeState = myLeaseTerm.changeComparedTo(myInvestment.leaseTerm)
+        
+        if myInvestment.changeState != .none {
+            myInvestment.leaseTerm.makeEqualTo(myLeaseTerm)
         }
-        if self.myPaymentFrequency != self.myInvestment.leaseTerm.paymentFrequency {
-            self.myInvestment.hasChanged = true
-            self.myInvestment.leaseTerm.paymentFrequency = self.myPaymentFrequency
-            self.myInvestment.resetForFrequencyChange(oldFrequently: paymentFrequencyOnEntry)
-        }
-        if self.endOfMonthRule != self.myInvestment.leaseTerm.endOfMonthRule {
-            self.myInvestment.hasChanged = true
-            self.myInvestment.leaseTerm.endOfMonthRule = self.endOfMonthRule
+        
+        if baseCommenceDate.isNotEqualTo(date: myInvestment.asset.fundingDate) {
+            myInvestment.resetForBaseTermCommenceDateChange()
         }
         path.removeLast()
     }

@@ -33,4 +33,19 @@ public struct LeaseTerm {
         
         return isEqual
     }
+    
+    func changeComparedTo(_ other: LeaseTerm) -> ChangeType {
+           if self.isEqual(to: other) {
+               return .none
+           }
+           
+           return .material
+          
+       }
+       
+       mutating func makeEqualTo(_ other: LeaseTerm) {
+           self.baseCommenceDate = other.baseCommenceDate
+           self.paymentFrequency = other.paymentFrequency
+           self.endOfMonthRule = other.endOfMonthRule
+       }
 }

@@ -33,4 +33,18 @@ public struct TaxAssumptions {
         
         return isEqual
     }
+    
+    func changeComparedTo(_ other: TaxAssumptions) -> ChangeType {
+            if isEqual(to: other) {
+                return .none
+            }
+            
+            return .material
+        }
+        
+    mutating func makeEqualTo(_ other: TaxAssumptions) {
+        self.federalTaxRate = other.federalTaxRate
+        self.fiscalMonthEnd = other.fiscalMonthEnd
+        self.dayOfMonPaid = other.dayOfMonPaid
+    }
 }

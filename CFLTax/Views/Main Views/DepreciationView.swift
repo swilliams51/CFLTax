@@ -116,12 +116,14 @@ struct DepreciationView: View {
         self.myDepreciation.life = myLife.toInteger()
         self.myDepreciation.bonusDeprecPercent = myBonusPercent.toDecimal()
         self.myDepreciation.salvageValue = mySalvageAmount
-        
-        if self.myInvestment.depreciation.isEqual(to: self.myDepreciation)  == false {
-            self.myInvestment.hasChanged = true
-            self.myInvestment.depreciation = myDepreciation
-        }
-        self.path.removeLast()
+       
+        self.myInvestment.changeState = self.myDepreciation.changeComparedTo(self.myInvestment.depreciation)
+       
+       if self.myInvestment.changeState == .material {
+           self.myInvestment.depreciation = myDepreciation
+       }
+       
+       self.path.removeLast()
     }
     
     private func keyBoardIsActive() -> Bool {
@@ -136,7 +138,7 @@ struct DepreciationView: View {
     }
     
     private func myAppear() {
-        self.myDepreciation = myInvestment.depreciation
+        self.myDepreciation.makeEqualTo(myInvestment.depreciation)
         self.myLife = myDepreciation.life.toDouble()
         self.myBonusPercent = myDepreciation.bonusDeprecPercent.toString(decPlaces: 4)
         self.mySalvageAmount = myDepreciation.salvageValue

@@ -282,11 +282,11 @@ extension Investment {
         self.resetForFundingDateChange()
         if self.feeExists {
             self.fee.amount = "0.00"
-            self.setFee()
+            self.setFeesExistence()
         }
         if self.earlyBuyoutExists {
             self.earlyBuyout.amount = "0.00"
-            self.setEBO()
+            self.setEBOsExistence()
         }
         
         return self.writeInvestment()

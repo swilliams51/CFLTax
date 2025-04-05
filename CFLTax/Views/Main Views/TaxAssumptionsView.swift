@@ -66,11 +66,12 @@ struct TaxAssumptionsView: View {
     }
     
     private func myDone() {
-        if self.myInvestment.taxAssumptions.isEqual(to: myTaxAssumptions) == false {
-            self.myInvestment.taxAssumptions = myTaxAssumptions
-            self.myInvestment.hasChanged = true
-        }
-        path.removeLast()
+        self.myInvestment.changeState = myTaxAssumptions.changeComparedTo(self.myInvestment.taxAssumptions)
+                
+            if self.myInvestment.changeState == .material {
+                self.myInvestment.taxAssumptions = myTaxAssumptions
+            }
+            path.removeLast()
     }
 }
 

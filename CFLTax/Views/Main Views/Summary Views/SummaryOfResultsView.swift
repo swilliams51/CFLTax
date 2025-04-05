@@ -55,7 +55,7 @@ struct SummaryOfResultsView: View {
         .onAppear{
             self.isLoading = false
             self.myInvestment.calculate()
-            self.myInvestment.hasChanged = false
+            self.myInvestment.changeState = .none
             self.myATYield = myInvestment.getMISF_AT_Yield()
             self.myBTYield = myInvestment.getMISF_BT_Yield()
             self.myIRRofPTCF = myInvestment.getIRR_PTCF()

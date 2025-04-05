@@ -54,7 +54,7 @@ struct CashflowView: View {
         .onAppear{
             self.isLoading = false
             myInvestment.calculate()
-            myInvestment.hasChanged = false
+            myInvestment.changeState = .none
             
             self.assetCost = myInvestment.getAssetCost(asCashflow: true).toString(decPlaces: 3)
             self.feeAmount = myInvestment.getFeeAmount().toString(decPlaces: 3)

@@ -41,20 +41,39 @@ public struct Depreciation {
         self.vestingPeriod = 0
     }
     
+    func changeComparedTo(_ other: Depreciation) -> ChangeType {
+            if self.isEqual(to: other) {
+                return .none
+            }
+            
+            return .material
+        }
+        
     func isEqual(to other: Depreciation) -> Bool {
         var isEqual: Bool = false
         if basisReduction == other.basisReduction &&
-        bonusDeprecPercent == other.bonusDeprecPercent &&
-        convention == other.convention &&
-        life == other.life &&
-        method == other.method &&
-        investmentTaxCredit == other.investmentTaxCredit &&
-        salvageValue == other.salvageValue &&
+            bonusDeprecPercent == other.bonusDeprecPercent &&
+            convention == other.convention &&
+            life == other.life &&
+            method == other.method &&
+            investmentTaxCredit == other.investmentTaxCredit &&
+            salvageValue == other.salvageValue &&
             vestingPeriod == other.vestingPeriod {
             isEqual = true
         }
         
         return isEqual
+    }
+    
+    mutating func makeEqualTo(_ other: Depreciation) {
+        self.basisReduction = other.basisReduction
+        self.bonusDeprecPercent = other.bonusDeprecPercent
+        self.convention = other.convention
+        self.life = other.life
+        self.method = other.method
+        self.investmentTaxCredit = other.investmentTaxCredit
+        self.salvageValue = other.salvageValue
+        self.vestingPeriod = other.vestingPeriod
     }
     
 }

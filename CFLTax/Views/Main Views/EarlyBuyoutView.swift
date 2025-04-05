@@ -265,9 +265,11 @@ extension EarlyBuyoutView {
 
     func submitForm() {
         if self.myInvestment.earlyBuyout.isEqual(to: self.myEBO) == false {
-            self.myInvestment.earlyBuyout = self.myEBO
-            self.myInvestment.earlyBuyout.hasChanged = true
-        }
+               self.myInvestment.earlyBuyout = self.myEBO
+               self.myInvestment.changeState = .immaterial
+           } else {
+               self.myInvestment.changeState = .none
+           }
     }
 
     var rangeBaseTermMonths: ClosedRange<Double> {

@@ -388,11 +388,11 @@ extension GroupDetailView {
     
     func submitForm() {
         if myInvestment.rent.groups[index].isEqual(to: selectedGroup) == false {
-            myInvestment.rent.groups[index].makeEquivalent(to: selectedGroup)
-            myInvestment.hasChanged = true
-        }
-        self.myInvestment.resetFirstGroup(isInterim: self.myInvestment.rent.interimExists())
-        self.path.removeLast()
+               myInvestment.rent.groups[index].makeEqualTo(selectedGroup)
+               myInvestment.changeState = .material
+       }
+       self.myInvestment.resetFirstGroup(isInterim: self.myInvestment.rent.interimExists())
+       self.path.removeLast()
     }
     
     func isGroupDeletable() -> (condition:Bool, message: Int) {

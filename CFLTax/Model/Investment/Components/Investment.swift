@@ -22,7 +22,7 @@ public class Investment {
     var beforeTaxCashflows: Cashflows = Cashflows()
     var earlyBuyoutExists: Bool = false
     var feeExists: Bool = false
-    var hasChanged: Bool = false
+    var changeState: ChangeType = .none
     
    public init() {
         self.asset = asset
@@ -33,8 +33,8 @@ public class Investment {
         self.economics = economics
         self.fee = fee
         self.earlyBuyout = earlyBuyout
-        self.setEBO()
-        self.setFee()
+        self.setEBOsExistence()
+        self.setFeesExistence()
     }
     
     public init(aAsset: Asset, aLeaseTerm: LeaseTerm, aRent: Rent, aDepreciation: Depreciation, aTaxAssumptions: TaxAssumptions, aEconomics: Economics, aFee: Fee, aEarlyBuyout: EarlyBuyout) {
@@ -46,8 +46,8 @@ public class Investment {
         self.economics = aEconomics
         self.fee = aFee
         self.earlyBuyout = aEarlyBuyout
-        self.setEBO()
-        self.setFee()
+        self.setEBOsExistence()
+        self.setFeesExistence()
     }
     
     public init(aFile: String) {
@@ -60,8 +60,8 @@ public class Investment {
         self.economics = readEconomics(arrayEconomics: arrayInvestment[5].components(separatedBy: ","))
         self.fee = readFee(arrayFee: arrayInvestment[6].components(separatedBy: ","))
         self.earlyBuyout = readEarlyBuyout(arrayEBO: arrayInvestment[7].components(separatedBy: ","))
-        self.setEBO()
-        self.setFee()
+        self.setEBOsExistence()
+        self.setFeesExistence()
     }
     
     
@@ -75,27 +75,41 @@ public class Investment {
         self.economics = readEconomics(arrayEconomics: arrayInvestment[5].components(separatedBy: ","))
         self.fee = readFee(arrayFee: arrayInvestment[6].components(separatedBy: ","))
         self.earlyBuyout = readEarlyBuyout(arrayEBO: arrayInvestment[7].components(separatedBy: ","))
-        self.setEBO()
-        self.setFee()
+        self.setEBOsExistence()
+        self.setFeesExistence()
         if resetDates {
             self.resetAllDatesToCurrentDate()
         }
     }
     
-    public func setEBO() {
-        if earlyBuyout.amount.toDecimal() == 0.0 {
-            earlyBuyoutExists = false
+    public func setEBOsExistence() {
+        if self.earlyBuyout.amount.toDecimal() == 0.0 {
+            self.earlyBuyoutExists = false
         } else {
-            earlyBuyoutExists = true
+            self.earlyBuyoutExists = true
         }
     }
+        
+    public func removeEBO() {
+        self.earlyBuyout.amount = "0.0"
+        self.setEBOsExistence()
+        self.economics.solveFor = .yield
+        self.changeState = .immaterial
+    }
     
-    public func setFee() {
+    public func setFeesExistence() {
         if self.getFeeAmount() == 0.0 {
             self.feeExists = false
         } else {
             self.feeExists = true
         }
+    }
+    
+    public func removeFee() {
+        self.fee.amount = "0.0"
+        self.setFeesExistence()
+        self.economics.solveFor = .yield
+        self.changeState = .immaterial
     }
     
     public func getBaseTermInMonths() -> Int {

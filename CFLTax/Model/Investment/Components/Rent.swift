@@ -23,6 +23,30 @@ public struct Rent {
         self.groups.append(groupToAdd)
     }
     
+    public func isEqual(to other: Rent) -> Bool {
+        for x in 0..<self.groups.count {
+            if !self.groups[x].isEqual(to: other.groups[x]) {
+                return false
+            }
+        }
+            
+        return true
+    }
+    
+    mutating func makeEqualTo(_ other: Rent) {
+            for x in 0..<self.groups.count {
+                self.groups[x].makeEqualTo(other.groups[x])
+            }
+        }
+        
+    func changeComparedTo(_ other: Rent) -> ChangeType {
+        if self.isEqual(to: other) {
+            return .none
+        }
+        
+        return .material
+    }
+    
     public func getNumberOfPaymentsForNewGroup(aGroup: Group, aFrequency: Frequency, eomRule: Bool, referDate: Date) -> Int {
         var numberOfPayments: Int = aGroup.noOfPayments
         let maxRemaining: Int = self.getMaxRemainNumberPayments(maxBaseTerm: maxBaseTerm, freq: aFrequency, eom: eomRule, aRefer: referDate)

@@ -20,11 +20,19 @@ public struct Fee {
         self.feeType = feeType
     }
     
-    init() {
-        amount = "0.00"
-        feeType = .expense
-        datePaid = Date()
-    }
+    func changeComparedTo(_ other: Fee) -> ChangeType {
+            if isEqual(to: other) {
+                return .none
+            }
+            
+            return .material
+        }
+        
+        mutating func makeEqualTo(_ other: Fee) {
+            self.amount = other.amount
+            self.datePaid = other.datePaid
+            self.feeType = other.feeType
+        }
     
     
     func isEqual(to other: Fee) -> Bool {

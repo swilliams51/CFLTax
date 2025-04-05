@@ -22,6 +22,7 @@ struct HomeView: View {
     @State var myAnnualizedRent: AnnualizedRentalCashflows = AnnualizedRentalCashflows()
     
     @State var isLoading: Bool = false
+    @State private var fileMenuIsDisabled : Bool = false
     @State private var myFeeAmortization: FeeIncomes = FeeIncomes()
     @State private var isShowingCalculationErrorAlert: Bool = false
     @State private var currentFile: String = "File is New"
@@ -74,8 +75,11 @@ struct HomeView: View {
                         removeItemsMenu
                     }, label: {
                         Image(systemName: "minus.circle")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30, height: 30)
                             .foregroundColor(ColorTheme().accent)
-                            .imageScale(.large)
+                            .opacity(fileMenuIsDisabled ? 0.5 : 1.0)
                     })
                 }
                
@@ -84,11 +88,13 @@ struct HomeView: View {
                         addItemsMenu
                     }, label: {
                         Image(systemName: "plus.circle")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30, height: 30)
                             .foregroundColor(ColorTheme().accent)
-                            .opacity(investmentHasChanged() ? 0.5 : 1.0)
-                            .imageScale(.large)
+                            .opacity(fileMenuIsDisabled ? 0.5 : 1.0)
                     })
-                    .disabled(investmentHasChanged())
+                    .disabled(fileMenuIsDisabled)
                 }
             }
             .environment(\.colorScheme, isDark ? .dark : .light)
@@ -97,9 +103,15 @@ struct HomeView: View {
             }
             .onAppear{
                 self.isLoading = false
-                if self.myInvestment.hasChanged && myInvestment.earlyBuyoutExists == true {
-                    self.myInvestment.earlyBuyout.amount = "0.00"
-                    self.myInvestment.earlyBuyoutExists = false
+                if self.myInvestment.changeState == .material {
+                    if self.myInvestment.earlyBuyoutExists {
+                        self.myInvestment.removeEBO()
+                    }
+                    fileMenuIsDisabled = true
+                } else if self.myInvestment.changeState == .immaterial{
+                    fileMenuIsDisabled = true
+                } else {
+                    fileMenuIsDisabled = false
                 }
                 if self.darkMode == true {
                     isDark = true
@@ -267,7 +279,8 @@ struct HomeView: View {
         .onTapGesture {
             if myInvestment.isSolveForValid() {
                 self.isLoading = true
-                resetInvestment()
+                self.myInvestment.changeState = .none
+                self.fileMenuIsDisabled = false
                 Task {
                     await goToResultsView()
                 }
@@ -283,17 +296,18 @@ struct HomeView: View {
         HStack{
             Text("File Menu")
                 .font(myFont)
-                .foregroundColor(investmentHasChanged() ? Color("InvestChangedTrue") : Color("InvestChangedFalse"))
+                .foregroundColor(fileMenuIsDisabled ? Color("InvestChangedTrue") : Color("InvestChangedFalse"))
             Spacer()
             Image(systemName: "chevron.right")
-                .foregroundColor(investmentHasChanged() ? Color("InvestChangedTrue") : Color("InvestChangedFalse"))
+                .foregroundColor(fileMenuIsDisabled ? Color("InvestChangedTrue") : Color("InvestChangedFalse"))
         }
         .contentShape(Rectangle())
         .onTapGesture {
             path.append(26)
         }
-        .disabled(investmentHasChanged() ? true : false)
+        .disabled(fileMenuIsDisabled ? true : false)
     }
+    
     
     private func goToEBOView() async {
         try? await Task.sleep(nanoseconds: 500_000_000)
@@ -305,15 +319,15 @@ struct HomeView: View {
         self.path.append(25)
     }
     
-    private func resetInvestment() {
-        myInvestment.hasChanged = false
-        if myInvestment.feeExists {
-            myInvestment.fee.hasChanged = false
-        }
-        if myInvestment.earlyBuyoutExists {
-            myInvestment.earlyBuyout.hasChanged = false
-        }
-    }
+//    private func resetInvestment() {
+//        myInvestment.hasChanged = false
+//        if myInvestment.feeExists {
+//            myInvestment.fee.hasChanged = false
+//        }
+//        if myInvestment.earlyBuyoutExists {
+//            myInvestment.earlyBuyout.hasChanged = false
+//        }
+//    }
     
 //    private func calculate() {
 //        if myInvestment.isSolveForValid() {
@@ -355,19 +369,19 @@ struct HomeView: View {
 //        }
 //    }
     
-    private func investmentHasChanged() -> Bool {
-        if myInvestment.hasChanged {
-            return true
-        }
-        if myInvestment.fee.hasChanged {
-            return true
-        }
-        if myInvestment.earlyBuyout.hasChanged {
-            return true
-        }
-        
-        return false
-    }
+//    private func investmentHasChanged() -> Bool {
+//        if myInvestment.hasChanged {
+//            return true
+//        }
+//        if myInvestment.fee.hasChanged {
+//            return true
+//        }
+//        if myInvestment.earlyBuyout.hasChanged {
+//            return true
+//        }
+//        
+//        return false
+//    }
     
 }
 
@@ -397,8 +411,8 @@ extension HomeView {
     var removeFeeItem: some View {
         Button(action: {
             self.myInvestment.fee.amount = "0.00"
-            self.myInvestment.feeExists = false
-            self.myInvestment.hasChanged = true
+            self.myInvestment.setFeesExistence()
+            self.myInvestment.changeState = .material
         }) {
             Label("Remove Fee", systemImage: "folder.badge.minus")
                 .font(myFont)
@@ -408,7 +422,8 @@ extension HomeView {
     var removeEBOItem: some View {
         Button(action: {
             self.myInvestment.earlyBuyout.amount = "0.00"
-            self.myInvestment.earlyBuyoutExists = false
+            self.myInvestment.setEBOsExistence()
+            self.myInvestment.changeState = .material
         }) {
             Label("Remove Early Buyout", systemImage: "folder.badge.minus")
                 .font(myFont)
@@ -429,7 +444,8 @@ extension HomeView {
     var addFeeItem: some View {
         Button(action: {
             self.myInvestment.setFeeToDefault()
-            self.myInvestment.feeExists = true
+            self.myInvestment.setFeesExistence()
+            self.myInvestment.changeState = .immaterial
         }) {
             Label("Add Fee", systemImage: "folder.badge.plus")
                 .font(myFont)
@@ -439,7 +455,8 @@ extension HomeView {
     var addEBOItem: some View {
         Button(action: {
             self.myInvestment.setEBOToDefault()
-            self.myInvestment.earlyBuyoutExists = true
+            self.myInvestment.setEBOsExistence()
+            self.myInvestment.changeState = .immaterial
         }) {
             Label("Add EBO", systemImage: "folder.badge.plus")
         }

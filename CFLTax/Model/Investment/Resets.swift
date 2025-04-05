@@ -188,8 +188,8 @@ extension Investment {
         self.economics = readEconomics(arrayEconomics: arrayInvestment[5].components(separatedBy: ","))
         self.fee = readFee(arrayFee: arrayInvestment[6].components(separatedBy: ","))
         self.earlyBuyout = readEarlyBuyout(arrayEBO: arrayInvestment[7].components(separatedBy: ","))
-        self.setFee()
-        self.setEBO()
+        self.setFeesExistence()
+        self.setEBOsExistence()
         self.resetAllDatesToCurrentDate()
     }
 
@@ -214,8 +214,8 @@ extension Investment {
         self.economics = myEconomics
         self.fee = myFee
         self.earlyBuyout = myEBO
-        self.setFee()
-        self.setEBO()
+        self.setFeesExistence()
+        self.setEBOsExistence()
         
     }
     

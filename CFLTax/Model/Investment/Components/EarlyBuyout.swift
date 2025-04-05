@@ -42,6 +42,13 @@ public struct EarlyBuyout {
         
         return isEqual
     }
+    
+    mutating func makeEqualTo(_ other: EarlyBuyout) {
+            self.amount = other.amount
+            self.exerciseDate = other.exerciseDate
+            self.advanceRentDueIsPaid = other.advanceRentDueIsPaid
+        }
+    
 }
 
 extension Investment {
@@ -132,7 +139,7 @@ extension Investment {
         let myEBOInvestment: Investment = self.clone()
         if myEBOInvestment.feeExists {
             myEBOInvestment.fee.amount = "0.0"
-            myEBOInvestment.setFee()
+            myEBOInvestment.setFeesExistence()
         }
         myEBOInvestment.rent = eboRent(aInvestment: myEBOInvestment, chopDate: aEBO.exerciseDate)
         myEBOInvestment.asset.residualValue = aEBO.amount
@@ -177,7 +184,7 @@ extension Investment {
         var totalNoOfPaymentsAdded: Int = 0
         while totalNoOfPaymentsAdded < noOfPeriodsInEBOTerm { // 0 < 48
             var group: Group = Group()
-            group.makeEquivalent(to: tempInvestment.rent.groups[start])
+            group.makeEqualTo(tempInvestment.rent.groups[start])
             let groupNoOfPayments: Int = group.noOfPayments // 60
             let noToAdd: Int = min(groupNoOfPayments, noOfPeriodsInEBOTerm - totalNoOfPaymentsAdded)
             group.noOfPayments = noToAdd

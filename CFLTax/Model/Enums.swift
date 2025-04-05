@@ -165,6 +165,12 @@ extension String {
     }
 }
 
+public enum ChangeType: String {
+    case none
+    case immaterial
+    case material
+}
+
 public enum ConventionType {
     case halfYear
     case midMonth
