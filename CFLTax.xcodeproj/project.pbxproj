@@ -16,6 +16,7 @@
 		DB98D1CB2D21F01D0091FDAA /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = DB98D1CA2D21F01D0091FDAA /* FirebaseAnalytics */; };
 		DBD6FD902D553E4B00DAC41A /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = DBD6FD8F2D553E4B00DAC41A /* RevenueCat */; };
 		DBD6FD922D553E4B00DAC41A /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = DBD6FD912D553E4B00DAC41A /* RevenueCatUI */; };
+		DBD6FE822D55441B00DAC41A /* RevenueCatPaywall.storekit in Resources */ = {isa = PBXBuildFile; fileRef = DBD6FE812D55441B00DAC41A /* RevenueCatPaywall.storekit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		DB3CA4542D2EEAAF004A4E35 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		DB3CA4592D2F1AFD004A4E35 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		DBB1712E2C6514EA00365B9A /* CFLTax.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CFLTax.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DBD6FE812D55441B00DAC41A /* RevenueCatPaywall.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = RevenueCatPaywall.storekit; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -56,6 +58,7 @@
 		DBB171252C6514EA00365B9A = {
 			isa = PBXGroup;
 			children = (
+				DBD6FE812D55441B00DAC41A /* RevenueCatPaywall.storekit */,
 				DB3CA3E42D2EEAAF004A4E35 /* CFLTaxApp.swift */,
 				DB3CA4592D2F1AFD004A4E35 /* GoogleService-Info.plist */,
 				DB3CA4542D2EEAAF004A4E35 /* PrivacyInfo.xcprivacy */,
@@ -149,6 +152,7 @@
 				DB3CA4552D2EEAAF004A4E35 /* Assets.xcassets in Resources */,
 				DB3CA4562D2EEAAF004A4E35 /* PrivacyInfo.xcprivacy in Resources */,
 				DB3CA45A2D2F1AFD004A4E35 /* GoogleService-Info.plist in Resources */,
+				DBD6FE822D55441B00DAC41A /* RevenueCatPaywall.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

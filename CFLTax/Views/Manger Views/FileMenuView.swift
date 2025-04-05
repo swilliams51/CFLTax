@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import RevenueCat
+import RevenueCatUI
 
 struct FileMenuView: View {
     @Bindable var myInvestment: Investment
@@ -41,6 +43,7 @@ struct FileMenuView: View {
                     .scaleEffect(3.0)
             }
         }
+        .presentPaywallIfNeeded(requiredEntitlementIdentifier: "All Access")
         .environment(\.colorScheme, isDark ? .dark : .light)
         .navigationBarTitleDisplayMode(.large)
         .navigationBarBackButtonHidden(true)

@@ -26,8 +26,7 @@ struct AboutView: View {
                 Section {
                     thankYouItem
                     productDetailsItem
-                    sendSuggestionsItem
-                    emailAddressItem
+                    privacyPolicyAndEULA
                 }
                 
             }
@@ -99,21 +98,17 @@ struct AboutView: View {
         }
     }
     
-    var sendSuggestionsItem: some View {
+    var privacyPolicyAndEULA: some View {
         HStack {
-            Spacer()
-            Text("Questions or comments:")
-                .font(.subheadline)
-            Spacer()
-        }
-    }
-    
-    var emailAddressItem: some View {
-        HStack {
-            Spacer()
-            Text("info@calclpm.com")
+            Link("Privacy Policy", destination: URL(string: "https://www.calclpm.com/privacy-policy")!)
                 .font(myFont)
+                .padding(.leading, 15)
             Spacer()
+            Text(" | ")
+            Spacer()
+            Link("Terms of Use", destination: URL(string: "https://www.calclpm.com/terms-of-use")!)
+                .font(myFont)
+                .padding(.trailing, 15)
         }
     }
     

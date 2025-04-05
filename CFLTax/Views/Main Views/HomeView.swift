@@ -6,6 +6,9 @@
 //
 
 import SwiftUI
+import FirebaseAnalytics
+import RevenueCat
+import RevenueCatUI
 
 struct HomeView: View {
     @State public var myInvestment: Investment = Investment(aFile: sampleFile, resetDates: true)
@@ -63,6 +66,8 @@ struct HomeView: View {
                         .scaleEffect(3)
                 }
             }
+            .presentPaywallIfNeeded(requiredEntitlementIdentifier: "All Access")
+            .analyticsScreen(name: "Home")
             .toolbar{
                 ToolbarItem(placement: .bottomBar) {
                     Menu(content: {
